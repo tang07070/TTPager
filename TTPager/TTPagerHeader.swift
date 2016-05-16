@@ -58,9 +58,18 @@ public class TTPagerHeader: UIView {
     var tabs = [UIView]()
     var tabContainerView = UIView()
     var indicatorView = UIView()
+    var tabClass: NSObject.Type?
 
     var elementsCount = Int(0)
     var currentIndex = Int(0)
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+    }
+    
+    required public init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+    }
 
     public func addTab(title: String) ->Void {
         let tab = self.createTab()
@@ -71,6 +80,7 @@ public class TTPagerHeader: UIView {
         tab.addGestureRecognizer(tapGesture)
         tabs.append(tab)
         self.addSubview(tab)
+
     }
 
     public func selectTab(index: Int) -> Void {
@@ -82,7 +92,12 @@ public class TTPagerHeader: UIView {
     }
 
     private func createTab() -> UIView {
-        return DefaultTTPagerTab()
+        if tabClass == nil {
+            return DefaultTTPagerTab()
+        }
+        else {
+            return tabClass!.init() as! UIView
+        }
     }
 
     public override func layoutSubviews() {

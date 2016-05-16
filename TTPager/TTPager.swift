@@ -19,10 +19,10 @@ extension TTPagerDelegate {
     func ttPager(ttPager: TTPager, pageDidSwitch from: Int, to: Int) -> Void {}
 }
 
-
 public class TTPager: UIViewController {
     var pagerHeader = TTPagerHeader()
     var pagerHeaderHeight = 40.0
+    var tabClass: NSObject.Type?
     var views: Array<UIView>!
     var controllers = [UIViewController]()
     var currentIndex = Int(0)
@@ -58,6 +58,10 @@ public class TTPager: UIViewController {
     }
 
     private func createpagerHeader() -> Void {
+        pagerHeader.tabClass = tabClass
+        pagerHeader.frame = CGRect(x: 0, y: 0, width: self.view.frame.width.native, height: pagerHeaderHeight)
+        pagerHeader.delegate = self
+        self.view.addSubview(pagerHeader)
         for vc in controllers {
             if let title = vc.title {
                 pagerHeader.addTab(title)
@@ -66,11 +70,6 @@ public class TTPager: UIViewController {
                 pagerHeader.addTab("")
             }
         }
-        pagerHeader.frame = CGRect(x: 0, y: 0, width: self.view.frame.width.native, height: pagerHeaderHeight)
-        pagerHeader.autoresizingMask = .FlexibleWidth
-        pagerHeader.backgroundColor = UIColor.blackColor()
-        pagerHeader.delegate = self
-        self.view.addSubview(pagerHeader)
     }
 
     private func createPageContent() -> Void {
