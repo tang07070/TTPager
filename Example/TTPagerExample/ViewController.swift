@@ -24,12 +24,14 @@ class ViewController: UIViewController, TTPagerDelegate {
         v3.title = "33333"
         controllers = [v1, v2, v3]
 
-        let tab = TTPager()
-        tab.delegate = self
-        self.addChildViewController(tab)
-        tab.view.frame = CGRect(x: 0, y: 20, width: self.view.frame.width, height: self.view.frame.height)
-        self.view.addSubview(tab.view)
-        tab.didMoveToParentViewController(self)
+        let pager = TTPager()
+        pager.pagerHeaderHeight = 30
+//        pager.scrollEnabled = false
+        pager.delegate = self
+        self.addChildViewController(pager)
+        pager.view.frame = CGRect(x: 0, y: 20, width: self.view.frame.width, height: self.view.frame.height)
+        self.view.addSubview(pager.view)
+        pager.didMoveToParentViewController(self)
     }
 
     override func didReceiveMemoryWarning() {

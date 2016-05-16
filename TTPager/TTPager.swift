@@ -21,11 +21,17 @@ extension TTPagerDelegate {
 
 
 public class TTPager: UIViewController {
-    var tabHeader = TTPagerHeader()
-    var tabHeaderHeight = 40.0
+    var pagerHeader = TTPagerHeader()
+    var pagerHeaderHeight = 40.0
     var views: Array<UIView>!
     var controllers = [UIViewController]()
     var currentIndex = Int(0)
+    var scrollEnabled = Bool(true) {
+        didSet {
+            scrollView.scrollEnabled = scrollEnabled
+        }
+    }
+
     internal var pageViewController = UIPageViewController(transitionStyle: .Scroll, navigationOrientation: .Horizontal, options: nil)
     internal var scrollView: UIScrollView {
         get {
@@ -38,7 +44,7 @@ public class TTPager: UIViewController {
 
     public override func viewDidLoad() {
         self.loadData()
-        self.createTabHeader()
+        self.createpagerHeader()
         self.createPageContent()
     }
 
@@ -51,27 +57,28 @@ public class TTPager: UIViewController {
         }
     }
 
-    private func createTabHeader() -> Void {
+    private func createpagerHeader() -> Void {
         for vc in controllers {
             if let title = vc.title {
-                tabHeader.addTab(title)
+                pagerHeader.addTab(title)
             }
             else {
-                tabHeader.addTab("")
+                pagerHeader.addTab("")
             }
         }
-        tabHeader.frame = CGRect(x: 0, y: 0, width: self.view.frame.width.native, height: tabHeaderHeight)
-        tabHeader.autoresizingMask = .FlexibleWidth
-        tabHeader.backgroundColor = UIColor.blackColor()
-        tabHeader.delegate = self
-        self.view.addSubview(tabHeader)
+        pagerHeader.frame = CGRect(x: 0, y: 0, width: self.view.frame.width.native, height: pagerHeaderHeight)
+        pagerHeader.autoresizingMask = .FlexibleWidth
+        pagerHeader.backgroundColor = UIColor.blackColor()
+        pagerHeader.delegate = self
+        self.view.addSubview(pagerHeader)
     }
 
     private func createPageContent() -> Void {
         pageViewController.dataSource = self
         pageViewController.delegate = self
+        scrollView.scrollEnabled = scrollEnabled
         self.addChildViewController(pageViewController)
-        pageViewController.view.frame = CGRect(x: 0, y: tabHeaderHeight, width: self.view.frame.width.native, height: self.view.frame.height.native - tabHeaderHeight)
+        pageViewController.view.frame = CGRect(x: 0, y: pagerHeaderHeight, width: self.view.frame.width.native, height: self.view.frame.height.native - pagerHeaderHeight)
         self.view.addSubview(pageViewController.view)
         pageViewController.didMoveToParentViewController(self)
         self.selectTabAtIndex(0, animated: false)
@@ -79,9 +86,11 @@ public class TTPager: UIViewController {
 
     private func selectTabAtIndex(index: Int, animated: Bool) -> Void {
         let direction: UIPageViewControllerNavigationDirection = currentIndex <= index ? .Forward : .Reverse
-        pageViewController.setViewControllers([controllers[index]], direction: direction, animated: animated, completion: nil)
+        let needAni = scrollEnabled ? animated : false
+        pageViewController.setViewControllers([controllers[index]], direction: direction, animated: needAni, completion: nil)
+        pagerHeader.selectTab(index)
+        self.delegate?.ttPager(self, pageDidSwitch: currentIndex, to: index)
         currentIndex = index
-        tabHeader.selectTab(index)
     }
 }
 
@@ -118,6 +127,6 @@ extension TTPager: UIPageViewControllerDataSource {
 extension TTPager: UIPageViewControllerDelegate {
     public func pageViewController(pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
         let index = controllers.indexOf((pageViewController.viewControllers?.first)!)
-        tabHeader.selectTab(index!)
+        pagerHeader.selectTab(index!)
     }
 }
