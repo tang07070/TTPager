@@ -58,13 +58,18 @@ public class TTPagerHeader: UIView {
     var tabs = [UIView]()
     var tabContainerView = UIView()
     var indicatorView = UIView()
+    var indicatorHeight = CGFloat(3)
     var tabClass: NSObject.Type?
 
     var elementsCount = Int(0)
     var currentIndex = Int(0)
+    var tabWidth = CGFloat(0)
 
     override init(frame: CGRect) {
         super.init(frame: frame)
+
+        indicatorView.backgroundColor = UIColor.redColor()
+        self.addSubview(indicatorView)
     }
     
     required public init?(coder aDecoder: NSCoder) {
@@ -80,7 +85,6 @@ public class TTPagerHeader: UIView {
         tab.addGestureRecognizer(tapGesture)
         tabs.append(tab)
         self.addSubview(tab)
-
     }
 
     public func selectTab(index: Int) -> Void {
@@ -89,6 +93,14 @@ public class TTPagerHeader: UIView {
         let newTab = tabs[index] as! TTPagerTabAppearance
         newTab.ttpagerSelectTab()
         currentIndex = index
+
+        let targetX = CGFloat(index)*tabWidth
+        if targetX != indicatorView.frame.origin.x {
+            UIView.animateWithDuration(0.4) {
+                self.indicatorView.frame = CGRect(x: targetX, y: self.frame.height - self.indicatorHeight,
+                                                       width: self.tabWidth, height: self.indicatorHeight)
+            }
+        }
     }
 
     private func createTab() -> UIView {
@@ -101,10 +113,13 @@ public class TTPagerHeader: UIView {
     }
 
     public override func layoutSubviews() {
-        let tabWidth = self.frame.width / CGFloat(tabs.count)
-        for index in 0...tabs.count-1 {
-            let tab = tabs[index]
-            tab.frame = CGRect(x: CGFloat(index)*tabWidth, y: 0, width: tabWidth, height: self.frame.height)
+        if tabs.count > 0 {
+            tabWidth = self.frame.width / CGFloat(tabs.count)
+            for index in 0...tabs.count-1 {
+                let tab = tabs[index]
+                tab.frame = CGRect(x: CGFloat(index)*tabWidth, y: 0, width: tabWidth, height: self.frame.height - indicatorHeight)
+            }
+            indicatorView.frame = CGRect(x: 0, y: self.frame.height - indicatorHeight, width: tabWidth, height: indicatorHeight)
         }
     }
 
@@ -112,5 +127,15 @@ public class TTPagerHeader: UIView {
         let view = gesture.view!
         let index = tabs.indexOf(view)
         delegate?.pageHeaderSelectTabAtIndex(index!)
+    }
+
+    public func contentDidScroll(offset: CGFloat) -> Void {
+        if tabs.count == 0 || indicatorHeight == 0 {
+            return
+        }
+
+        let baseOffset = tabWidth * CGFloat(currentIndex)
+        let movedOffset = baseOffset + offset/CGFloat(tabs.count)
+        indicatorView.frame = CGRect(x: movedOffset, y: self.frame.height - indicatorHeight, width: tabWidth, height: indicatorHeight)
     }
 }

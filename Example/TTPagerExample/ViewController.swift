@@ -50,14 +50,17 @@ class ViewController: UIViewController, TTPagerDelegate {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         let v1 = UIViewController()
-        v1.view.backgroundColor = UIColor.redColor()
+        v1.view.backgroundColor = UIColor.greenColor()
         v1.title = "111"
         let v2 = UIViewController()
         v2.view.backgroundColor = UIColor.blueColor()
         v2.title = "222"
         let v3 = UIViewController()
         v3.title = "333"
-        controllers = [v1, v2, v3]
+        let v4 = UIViewController()
+        v4.view.backgroundColor = UIColor.blackColor()
+        v4.title = "444"
+        controllers = [v1, v2, v3, v4]
 
         let pager = TTPager()
         pager.tabClass = CustomTab.self
