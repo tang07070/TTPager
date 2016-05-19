@@ -100,11 +100,14 @@ public class TTPager: UIViewController {
         pageViewController.dataSource = self
         pageViewController.delegate = self
         scrollView.scrollEnabled = scrollEnabled
+        if let recongnizr = self.navigationController?.interactivePopGestureRecognizer {
+            scrollView.panGestureRecognizer.requireGestureRecognizerToFail(recongnizr);
+        }
+        scrollView.delegate = self
         self.addChildViewController(pageViewController)
         pageViewController.view.frame = CGRect(x: 0, y: CGFloat(pagerHeaderHeight), width: self.view.frame.width, height: CGFloat(self.view.frame.height - CGFloat(pagerHeaderHeight)))
         self.view.addSubview(pageViewController.view)
         pageViewController.didMoveToParentViewController(self)
-        scrollView.delegate = self
         self.selectTabAtIndex(0, animated: false)
     }
 
@@ -119,9 +122,13 @@ public class TTPager: UIViewController {
         pageViewController.setViewControllers([controllers[index]], direction: direction, animated: needAni) { (b) in
             self.scrollView.delegate = self
         }
-        pagerHeader.selectTab(index)
-        self.delegate?.ttPager(self, pageDidSwitch: currentIndex, to: index)
-        currentIndex = index
+        self.didSwitchContent(index)
+    }
+
+    private func didSwitchContent(toIndex: Int) -> Void {
+        pagerHeader.selectTab(toIndex)
+        self.delegate?.ttPager(self, pageDidSwitch: currentIndex, to: toIndex)
+        currentIndex = toIndex
     }
 }
 
@@ -158,15 +165,13 @@ extension TTPager: UIPageViewControllerDataSource {
 extension TTPager: UIPageViewControllerDelegate {
     public func pageViewController(pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
         let index = controllers.indexOf((pageViewController.viewControllers?.first)!)
-        pagerHeader.selectTab(index!)
+        self.didSwitchContent(index!)
     }
 }
 
 extension TTPager: UIScrollViewDelegate {
     public func scrollViewDidScroll(scrollView: UIScrollView) {
-//        print(scrollView.contentOffset)
         let offset = scrollView.contentOffset.x - scrollView.bounds.width
-//        print(offset)
         pagerHeader.contentDidScroll(offset)
     }
 }
